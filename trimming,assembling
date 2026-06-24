@@ -1,0 +1,717 @@
+for j in 1 2 3 4 5 6; 
+do
+  mkdir -p /disks/node3_RAID6_120TB/hezhang/taikong/fen/run/${j}
+  > /disks/node3_RAID6_120TB/hezhang/taikong/fen/run/${j}/run.sh
+
+  for i in $(cut -f1 /disks/node3_RAID6_120TB/hezhang/taikong/fen/${j}.txt);
+  do
+    echo "java -jar /disks/node3_RAID6_120TB/hezhang/database/meta-seq-0.0.2/thirdpart/Trimmomatic/trimmomatic.jar PE \
+    -threads 30 \
+    -phred33 \
+    /disks/node3_RAID6_120TB/hezhang/taikong/metagenomic/${i}_R1.fastq.gz \
+    /disks/node3_RAID6_120TB/hezhang/taikong/metagenomic/${i}_R2.fastq.gz \
+    /disks/node3_RAID6_120TB/hezhang/taikong/trimming/reads/${i}_R1.fastq.gz \
+    /disks/node3_RAID6_120TB/hezhang/taikong/trimming/reads/${i}_R1_singleton.fastq.gz \
+    /disks/node3_RAID6_120TB/hezhang/taikong/trimming/reads/${i}_R2.fastq.gz \
+    /disks/node3_RAID6_120TB/hezhang/taikong/trimming/reads/${i}_R2_singleton.fastq.gz \
+    ILLUMINACLIP:/disks/node3_RAID6_120TB/hezhang/database/meta-seq-0.0.3/thirdpart/Trimmomatic/adapters/NexteraPE_TruSeq3-PE-2.fa:2:30:10:2:true \
+    SLIDINGWINDOW:4:15 \
+    LEADING:3 \
+    TRAILING:3 \
+    MINLEN:36" >> /disks/node3_RAID6_120TB/hezhang/taikong/fen/run/${j}/run.sh
+  done
+done
+
+for j in 1 2 3 4 5 6;
+do
+cd /disks/node3_RAID6_120TB/hezhang/taikong/fen/run/${j}
+nohup sh run.sh &
+done
+
+
+#### MEGAHIT
+    
+mkdir -p /disks/node3_RAID6_120TB/hezhang/taikong/megahit/
+
+biostack
+
+cd /disks/RAID6_120TB/hz/test_q_metagenome/assembly/megahit/
+for i in `cut -f1 /disks/node3_RAID6_120TB/hezhang/taikong/metagenomic/1.txt`;
+do
+megahit --presets  meta-sensitive -t  180 --min-contig-len 200 -o  /disks/node3_RAID6_120TB/hezhang/taikong/${i} -1    /disks/node3_RAID6_120TB/hezhang/taikong/trimming/reads/${i}_R1.fastq.gz -2    /disks/node3_RAID6_120TB/hezhang/taikong/trimming/reads/${i}_R2.fastq.gz;
+done
+
+
+
+for j in 1 2 3 4 5 6;
+do
+mkdir -p  /disks/node3_RAID6_120TB/hezhang/taikong/fen/run/${j}
+done
+
+for i in `cut -f1 /disks/node3_RAID6_120TB/hezhang/taikong/metagenomic/1.txt`;
+do
+mkdir -p  /disks/node3_RAID6_120TB/hezhang/taikong/megahit/${i}
+done
+
+#### 整体质控加组装
+for j in 1 2 3 4 5 6; 
+do
+  mkdir -p /disks/node3_RAID6_120TB/hezhang/taikong/fen/run/${j}
+  > /disks/node3_RAID6_120TB/hezhang/taikong/fen/run/${j}/run.sh
+
+  for i in $(cut -f1 /disks/node3_RAID6_120TB/hezhang/taikong/fen/${j}.txt);
+  do
+    echo "### Sample: ${i}" >> /disks/node3_RAID6_120TB/hezhang/taikong/fen/run/${j}/run.sh
+    echo "java -jar /disks/node3_RAID6_120TB/hezhang/database/meta-seq-0.0.3/thirdpart/Trimmomatic/trimmomatic.jar PE \
+    -threads 30 \
+    -phred33 \
+    /disks/node3_RAID6_120TB/hezhang/taikong/metagenomic/${i}_R1.fastq.gz \
+    /disks/node3_RAID6_120TB/hezhang/taikong/metagenomic/${i}_R2.fastq.gz \
+    /disks/node3_RAID6_120TB/hezhang/taikong/trimming/reads/${i}_R1.fastq.gz \
+    /disks/node3_RAID6_120TB/hezhang/taikong/trimming/reads/${i}_R1_singleton.fastq.gz \
+    /disks/node3_RAID6_120TB/hezhang/taikong/trimming/reads/${i}_R2.fastq.gz \
+    /disks/node3_RAID6_120TB/hezhang/taikong/trimming/reads/${i}_R2_singleton.fastq.gz \
+    ILLUMINACLIP:/disks/node3_RAID6_120TB/hezhang/database/meta-seq-0.0.3/thirdpart/Trimmomatic/adapters/NexteraPE_TruSeq3-PE-2.fa:2:30:10:2:true \
+    SLIDINGWINDOW:4:15 LEADING:3 TRAILING:3 MINLEN:36" \
+    >> /disks/node3_RAID6_120TB/hezhang/taikong/fen/run/${j}/run.sh
+
+    echo "megahit \
+    --presets meta-sensitive \
+    -t 30 \
+    --min-contig-len 200 \
+    -1 /disks/node3_RAID6_120TB/hezhang/taikong/trimming/reads/${i}_R1.fastq.gz \
+    -2 /disks/node3_RAID6_120TB/hezhang/taikong/trimming/reads/${i}_R2.fastq.gz \
+    -o /disks/node3_RAID6_120TB/hezhang/taikong/assembly/${i}" \
+    >> /disks/node3_RAID6_120TB/hezhang/taikong/fen/run/${j}/run.sh
+
+    echo "" >> /disks/node3_RAID6_120TB/hezhang/taikong/fen/run/${j}/run.sh
+  done
+done
+
+for j in 1 2 3 4 5 6;
+do
+cd /disks/node3_RAID6_120TB/hezhang/taikong/fen/run/${j}
+nohup sh run.sh &
+done
+
+
+for i in `cut -f1 /disks/node3_RAID6_120TB/hezhang/taikong/metagenomic/1.txt`;
+do
+mkdir -p  /disks/node3_RAID6_120TB/hezhang/taikong/megahit/${i}
+done
+
+
+for j in 1 2 3 4 5 6;
+do
+mkdir -p  /disks/node3_RAID6_120TB/hezhang/taikong/megahit/run/${j}
+done
+
+
+for j in 1 2 3 4 5 6; 
+do
+for i in $(cut -f1 /disks/node3_RAID6_120TB/hezhang/taikong/fen/${j}.txt);
+do
+   echo "megahit \
+    --presets meta-sensitive \
+    -t 30 \
+    --min-contig-len 200 \
+    -1 /disks/node3_RAID6_120TB/hezhang/taikong/trimming/reads/${i}_R1.fastq.gz \
+    -2 /disks/node3_RAID6_120TB/hezhang/taikong/trimming/reads/${i}_R2.fastq.gz \
+    -o /disks/node3_RAID6_120TB/hezhang/taikong/megahit/${i}" \
+    >> /disks/node3_RAID6_120TB/hezhang/taikong/megahit/run/${j}/run.sh
+  done
+done
+
+for j in 1 2 3 4 5 6;
+do
+cd  /disks/node3_RAID6_120TB/hezhang/taikong/megahit/run/${j}
+nohup sh run.sh &
+done
+
+#### 共组装
+mkdir -p /disks/node4_RAID6_120TB/hezhang/taikong/cleanreads
+
+for i in `cut -f1 /disks/node3_RAID6_120TB/hezhang/taikong/metagenomic/1.txt`;
+do
+cp /disks/node3_RAID6_120TB/hezhang/taikong/trimming/reads/${i}_R1.fastq.gz /disks/node4_RAID6_120TB/hezhang/taikong/cleanreads;
+cp /disks/node3_RAID6_120TB/hezhang/taikong/trimming/reads/${i}_R2.fastq.gz /disks/node4_RAID6_120TB/hezhang/taikong/cleanreads;
+done
+
+#### node4
+mkdir -p /disks/node4_RAID6_120TB/hezhang/taikong/co_megahit
+cd /disks/node4_RAID6_120TB/hezhang/taikong/co_megahit
+megahit \
+  -1 10_R1.fastq.gz,12_R1.fastq.gz,14_R1.fastq.gz,16_R1.fastq.gz,24_R1.fastq.gz,26_R1.fastq.gz,28_R1.fastq.gz,34_R1.fastq.gz,36_R1.fastq.gz,11_R1.fastq.gz,13_R1.fastq.gz,15_R1.fastq.gz,23_R1.fastq.gz,25_R1.fastq.gz,27_R1.fastq.gz,33_R1.fastq.gz,35_R1.fastq.gz,9_R1.fastq.gz \
+  -2 10_R2.fastq.gz,12_R2.fastq.gz,14_R2.fastq.gz,16_R2.fastq.gz,24_R2.fastq.gz,26_R2.fastq.gz,28_R2.fastq.gz,34_R2.fastq.gz,36_R2.fastq.gz,11_R2.fastq.gz,13_R2.fastq.gz,15_R2.fastq.gz,23_R2.fastq.gz,25_R2.fastq.gz,27_R2.fastq.gz,33_R2.fastq.gz,35_R2.fastq.gz,9_R2.fastq.gz \
+  -o coassembly_out \
+  --presets meta-sensitive \
+  -t 200
+  
+### 合并去冗余
+for i in `cut -f1 /disks/node3_RAID6_120TB/hezhang/taikong/metagenomic/1.txt`;
+do
+fastx-utils rename /disks/node3_RAID6_120TB/hezhang/taikong/megahit/${i}/final.contigs.fa d${i} > /disks/node3_RAID6_120TB/hezhang/taikong/megahit/${i}/${i}.contigs.fa;
+done
+
+mkdir -p /disks/node3_RAID6_120TB/hezhang/taikong/megahit/result
+for i in `cut -f1 /disks/node3_RAID6_120TB/hezhang/taikong/metagenomic/1.txt`;
+do
+cp /disks/node3_RAID6_120TB/hezhang/taikong/megahit/${i}/${i}.contigs.fa /disks/node3_RAID6_120TB/hezhang/taikong/megahit/result;
+done
+cd /disks/node3_RAID6_120TB/hezhang/taikong/megahit/result
+cat *.fa > ../dan_all.fa
+
+cat /disks/node3_RAID6_120TB/hezhang/taikong/megahit/dan_all.fa  /disks/node4_RAID6_120TB/hezhang/taikong/co_megahit/coassembly_out/hun_2_contigs.fa > /disks/node4_RAID6_120TB/hezhang/taikong/dan_hun_contigs.fa
+
+cd /disks/node4_RAID6_120TB/hezhang/taikong
+seqkit seq -m 10000 /disks/node4_RAID6_120TB/hezhang/taikong/dan_hun_contigs.fa > /disks/node4_RAID6_120TB/hezhang/taikong/dan_hun_contigs_10k.fasta
+
+seqkit seq -m 2000 /disks/node4_RAID6_120TB/hezhang/taikong/dan_hun_contigs.fa > /disks/node4_RAID6_120TB/hezhang/taikong/dan_hun_contigs_2k.fasta
+
+/disks/node2_RAID6_120TB/hz/watermelon_singlecells/clean_reads/clean_reads/rayfile-c -a efile111.hpccube.com -P 65022 -u biostack -w 9380ec0f4bd390bf4e-e709-4561-9aa9-77a929b4662d -no-meta -symbolic-links follow -retry 10 -retrytimeout 30 -o download -s '/vclust-1.3.1.sif' -d ./
+
+
+/disks/node2_RAID6_120TB/hz/watermelon_singlecells/clean_reads/clean_reads/rayfile-c -a efile111.hpccube.com -P 65022 -u biostack -w 9380ec0f4b762511c0-f320-4b5a-b015-9df7102c54a4 -no-meta -symbolic-links follow -retry 10 -retrytimeout 30 -o download -s '/shared/vclust.sh' -d ./
+
+/disks/node2_RAID6_120TB/hz/watermelon_singlecells/clean_reads/clean_reads/rayfile-c -a efile111.hpccube.com -P 65022 -u biostack -w 9380ec0f4ba2c3faad-4932-4bad-869a-8a26755da37d -no-meta -symbolic-links follow -retry 10 -retrytimeout 30 -o download -s '/shared/biostack-suits-0.0.5.sif' -d ./
+
+/disks/node4_RAID6_120TB/hezhang/taikong/dan_hun_contigs_2k.fasta
+
+#### 
+上传张老师那边进行病毒法系
+
+/disks/node4_RAID6_120TB/hezhang/taikong/dan_hun_contigs_2k.fasta
+
+/disks/node2_RAID6_120TB/hz/watermelon_singlecells/clean_reads/clean_reads/rayfile-c -a efile111.hpccube.com -P 65022 -u biostack -w b1ed11352f16dcc7ec-be85-45fb-9ad8-12e2442d5887 -tm -no-meta -symbolic-links follow -retry 10 -retrytimeout 30 -o upload -d /virus -s /disks/node4_RAID6_120TB/hezhang/taikong/dan_hun_contigs_2k.fasta
+
+/disks/node4_RAID6_120TB/hezhang/software/binning
+
+/disks/node2_RAID6_120TB/hz/watermelon_singlecells/clean_reads/clean_reads/rayfile-c -a efile111.hpccube.com -P 65022 -u biostack -w 9380ec0f4b2bd06989-6cc9-4f15-9643-fa0243d155bc -no-meta -symbolic-links follow -retry 10 -retrytimeout 30 -o download -s '/shared/scripts.tar.gz' -s '/shared/coverm-0.7.0.sif' -s '/shared/metabat-2.18.sif' -s '/shared/semibin-2.2.0.sif' -s '/shared/maxbin2-2.2.7.sif' -d /disks/node4_RAID6_120TB/hezhang/software/binning
+
+### 采取sembin2、metabat2、maxbin2三种软件分箱，使用coverm制作bam、丰度文件
+apptainer exec --env TMPDIR=$TMPDIR                  \
+    -B $TMPDIR                                       \
+    -B $PWD                                          \
+    $APPTAINER/coverm-0.7.0.sif                      \
+        coverm make                                  \
+        -p minimap2-sr                               \
+        -t $CPUS                                     \
+        -r assembly/$SAMPLE.fasta                    \
+        -1 trimmomatic/${SAMPLE}_1.fastq             \
+        -2 trimmomatic/${SAMPLE}_2.fastq             \
+        -o coverm/minimap2
+
+mkdir -p /disks/node3_RAID6_120TB/hezhang/taikong/binning/coverm
+mkdir -p /disks/node3_RAID6_120TB/hezhang/taikong/binning/coverm/tmp
+mkdir -p /disks/node3_RAID6_120TB/hezhang/taikong/binning/coverm/minimap2
+mkdir -p /disks/node3_RAID6_120TB/hezhang/taikong/binning/coverm/bam
+mkdir -p /disks/node3_RAID6_120TB/hezhang/taikong/binning/coverm/run
+mkdir -p /disks/node3_RAID6_120TB/hezhang/taikong/binning/coverm/metabat
+cd /disks/node3_RAID6_120TB/hezhang/taikong/binning/coverm
+for i in `cut -f1 /disks/node3_RAID6_120TB/hezhang/taikong/metagenomic/1.txt`;
+do
+mkdir -p /disks/node3_RAID6_120TB/hezhang/taikong/binning/coverm/minimap2/${i}
+mkdir -p /disks/node3_RAID6_120TB/hezhang/taikong/binning/coverm/run/${i}
+done
+
+for i in `cut -f1 /disks/node3_RAID6_120TB/hezhang/taikong/metagenomic/1.txt`;
+do
+echo "TMPDIR=/disks/node3_RAID6_120TB/hezhang/taikong/binning/coverm/tmp coverm make -p minimap2-sr -t 12 -r /disks/node3_RAID6_120TB/hezhang/taikong/megahit/result/${i}.contigs.fa.gz -1 /disks/node4_RAID6_120TB/hezhang/taikong/cleanreads/1/${i}_R1.fastq.gz -2 /disks/node4_RAID6_120TB/hezhang/taikong/cleanreads/2/${i}_R2.fastq.gz -o /disks/node3_RAID6_120TB/hezhang/taikong/binning/coverm/minimap2/${i}; 
+mv /disks/node3_RAID6_120TB/hezhang/taikong/binning/coverm/minimap2/${i}/*.bam /disks/node3_RAID6_120TB/hezhang/taikong/binning/coverm/bam/${i}.bam;
+TMPDIR=/disks/node3_RAID6_120TB/hezhang/taikong/binning/coverm/tmp coverm contig --threads 12 --methods metabat  --bam-files /disks/node3_RAID6_120TB/hezhang/taikong/binning/coverm/bam/${i}.bam -o /disks/node3_RAID6_120TB/hezhang/taikong/binning/coverm/metabat/${i}.txt;" > /disks/node3_RAID6_120TB/hezhang/taikong/binning/coverm/run/${i}/run.sh
+done
+
+
+for i in `cut -f1 /disks/node3_RAID6_120TB/hezhang/taikong/metagenomic/1.txt`;
+do
+cd /disks/node3_RAID6_120TB/hezhang/taikong/binning/coverm/run/${i}
+rm nohup.out
+nohup sh run.sh &
+done
+
+mkdir -p /disks/node4_RAID6_120TB/hezhang/taikong/binning/coverm
+mkdir -p /disks/node4_RAID6_120TB/hezhang/taikong/binning/coverm/tmp
+mkdir -p /disks/node4_RAID6_120TB/hezhang/taikong/binning/coverm/minimap2
+mkdir -p /disks/node4_RAID6_120TB/hezhang/taikong/binning/coverm/bam
+mkdir -p /disks/node4_RAID6_120TB/hezhang/taikong/binning/coverm/run
+mkdir -p /disks/node4_RAID6_120TB/hezhang/taikong/binning/coverm/metabat
+cd /disks/node4_RAID6_120TB/hezhang/taikong/binning/coverm
+for i in `cut -f1 /disks/node3_RAID6_120TB/hezhang/taikong/metagenomic/1.txt`;
+do
+mkdir -p /disks/node4_RAID6_120TB/hezhang/taikong/binning/coverm/minimap2/${i}
+mkdir -p /disks/node4_RAID6_120TB/hezhang/taikong/binning/coverm/run/${i}
+done
+
+for i in `cut -f1 /disks/node3_RAID6_120TB/hezhang/taikong/metagenomic/1.txt`;
+do
+echo "TMPDIR=/disks/node4_RAID6_120TB/hezhang/taikong/binning/coverm/tmp coverm make -p minimap2-sr -t 12 -r /disks/node3_RAID6_120TB/hezhang/taikong/megahit/result/hun_2_contigs.fa.gz -1 /disks/node4_RAID6_120TB/hezhang/taikong/cleanreads/1/${i}_R1.fastq.gz -2 /disks/node4_RAID6_120TB/hezhang/taikong/cleanreads/2/${i}_R2.fastq.gz -o /disks/node4_RAID6_120TB/hezhang/taikong/binning/coverm/minimap2/${i}; 
+mv /disks/node4_RAID6_120TB/hezhang/taikong/binning/coverm/minimap2/${i}/*.bam /disks/node4_RAID6_120TB/hezhang/taikong/binning/coverm/bam/${i}.bam;
+TMPDIR=/disks/node4_RAID6_120TB/hezhang/taikong/binning/coverm/tmp coverm contig --threads 12 --methods metabat  --bam-files /disks/node4_RAID6_120TB/hezhang/taikong/binning/coverm/bam/${i}.bam -o /disks/node4_RAID6_120TB/hezhang/taikong/binning/coverm/metabat/${i}.txt;" > /disks/node4_RAID6_120TB/hezhang/taikong/binning/coverm/run/${i}/run.sh
+done
+
+for i in `cut -f1 /disks/node3_RAID6_120TB/hezhang/taikong/metagenomic/1.txt`;
+do
+cd /disks/node4_RAID6_120TB/hezhang/taikong/binning/coverm/run/${i}
+rm nohup.out
+nohup sh run.sh &
+done
+
+
+for i in 10 11 12 13 14 15 16 23 24 25 26 27 28 34 35 36 9;
+do
+mkdir -p /disks/node3_RAID6_120TB/hezhang/taikong/binning/run/${i};
+mkdir -p /disks/node3_RAID6_120TB/hezhang/taikong/binning/semibin2/${i}
+mkdir -p /disks/node3_RAID6_120TB/hezhang/taikong/binning/maxbin2/${i}
+mkdir -p /disks/node3_RAID6_120TB/hezhang/taikong/binning/metabat2/${i}/
+done
+
+### 要加-B不然容器识别不了所在路径,如果一条命令中有多个外置存储路径，例如node3_RAID6_120TB、node4_RAID6_120TB，此时要加两个-B;例如：-B 例如: node3_RAID6_120TB -B node4_RAID6_120TB
+for i in 10 11 12 13 14 15 16 23 24 25 26 27 28 34 35 36 9;
+do
+echo "apptainer exec -B /disks/node3_RAID6_120TB /disks/node3_RAID6_120TB/hezhang/software/binning/metabat-2.18.sif metabat --numThreads 12 -x 1   -i /disks/node3_RAID6_120TB/hezhang/taikong/megahit/result/${i}.contigs.fa.gz    -a /disks/node3_RAID6_120TB/hezhang/taikong/binning/coverm/metabat/${i}.txt  -o /disks/node3_RAID6_120TB/hezhang/taikong/binning/metabat2/${i}/bin;
+        
+apptainer exec -B /disks/node3_RAID6_120TB /disks/node3_RAID6_120TB/hezhang/software/binning/maxbin2-2.2.7.sif   run_MaxBin.pl  -contig /disks/node3_RAID6_120TB/hezhang/taikong/megahit/result/${i}.contigs.fa.gz -max_iteration 50 -thread 12 -abund /disks/node3_RAID6_120TB/hezhang/taikong/binning/coverm/metabat/${i}.txt  -out /disks/node3_RAID6_120TB/hezhang/taikong/binning/maxbin2/${i}/bin;
+
+apptainer exec -B /disks/node3_RAID6_120TB --env TMPDIR=/disks/node3_RAID6_120TB/hezhang/taikong/binning/semibin2/tmp /disks/node3_RAID6_120TB/hezhang/software/binning/semibin-2.2.0.sif  SemiBin2 single_easy_bin   -t 12 --self-supervised  --tmpdir /disks/node3_RAID6_120TB/hezhang/taikong/binning/semibin2/tmp   --input-fasta /disks/node3_RAID6_120TB/hezhang/taikong/megahit/result/${i}.contigs.fa.gz  --input-bam /disks/node3_RAID6_120TB/hezhang/taikong/binning/coverm/bam/${i}.bam  -o /disks/node3_RAID6_120TB/hezhang/taikong/binning/semibin2/${i}/bin" >  /disks/node3_RAID6_120TB/hezhang/taikong/binning/run/${i}/run.sh;
+done
+
+for i in 10 11 12 13 14 15 16 23 24 25 26 27 28 34 35 36 9;
+do
+cd  /disks/node3_RAID6_120TB/hezhang/taikong/binning/run/${i};
+rm nohup.out
+nohup sh run.sh &
+done
+
+
+mkdir -p /disks/node3_RAID6_120TB/hezhang/taikong/binning/run/33;
+mkdir -p /disks/node3_RAID6_120TB/hezhang/taikong/binning/semibin2/33
+mkdir -p /disks/node3_RAID6_120TB/hezhang/taikong/binning/maxbin2/33
+mkdir -p /disks/node3_RAID6_120TB/hezhang/taikong/binning/metabat2/33
+
+
+### 要加-B不然容器识别不了所在路径
+echo "apptainer exec -B /disks/node3_RAID6_120TB /disks/node3_RAID6_120TB/hezhang/software/binning/metabat-2.18.sif metabat --numThreads 12 -x 1   -i /disks/node3_RAID6_120TB/hezhang/taikong/megahit/result/33.contigs.fa.gz    -a /disks/node3_RAID6_120TB/hezhang/taikong/binning/coverm/metabat/33.txt  -o /disks/node3_RAID6_120TB/hezhang/taikong/binning/metabat2/33/bin;
+        
+apptainer exec -B /disks/node3_RAID6_120TB /disks/node3_RAID6_120TB/hezhang/software/binning/maxbin2-2.2.7.sif   run_MaxBin.pl  -contig /disks/node3_RAID6_120TB/hezhang/taikong/megahit/result/33.contigs.fa.gz -max_iteration 50 -thread 12 -abund /disks/node3_RAID6_120TB/hezhang/taikong/binning/coverm/metabat/33.txt  -out /disks/node3_RAID6_120TB/hezhang/taikong/binning/maxbin2/33/bin;
+
+apptainer exec -B /disks/node3_RAID6_120TB --env TMPDIR=/disks/node3_RAID6_120TB/hezhang/taikong/binning/semibin2/tmp /disks/node3_RAID6_120TB/hezhang/software/binning/semibin-2.2.0.sif  SemiBin2 single_easy_bin   -t 12 --self-supervised  --tmpdir /disks/node3_RAID6_120TB/hezhang/taikong/binning/semibin2/tmp   --input-fasta /disks/node3_RAID6_120TB/hezhang/taikong/megahit/result/33.contigs.fa.gz  --input-bam /disks/node3_RAID6_120TB/hezhang/taikong/binning/coverm/bam/33.bam  -o /disks/node3_RAID6_120TB/hezhang/taikong/binning/semibin2/33/bin" >  /disks/node3_RAID6_120TB/hezhang/taikong/binning/run/33/run.sh;
+
+cd  /disks/node3_RAID6_120TB/hezhang/taikong/binning/run/33
+nohup sh run.sh &
+
+for i in 1 2 3 4 5;
+do
+mkdir -p /disks/node4_RAID6_120TB/hezhang/taikong/binning/run_semibin/${i};
+done
+
+
+for i in 10 11 12 13;
+do
+echo "apptainer exec -B /disks/node4_RAID6_120TB --env TMPDIR=/disks/node4_RAID6_120TB/hezhang/taikong/binning/semibin2/tmp /disks/node4_RAID6_120TB/hezhang/software/binning/semibin-2.2.0.sif  SemiBin2 single_easy_bin   -t 50 --self-supervised  --tmpdir /disks/node4_RAID6_120TB/hezhang/taikong/binning/semibin2/tmp   --input-fasta /disks/node4_RAID6_120TB/hezhang/taikong/binning/hun_2_contigs.fa.gz  --input-bam /disks/node4_RAID6_120TB/hezhang/taikong/binning/coverm/bam/${i}.bam  -o /disks/node4_RAID6_120TB/hezhang/taikong/binning/semibin2/${i}/bin" >> /disks/node4_RAID6_120TB/hezhang/taikong/binning/run_semibin/1/run.sh
+done
+
+for i in 14 15 16;
+do
+echo "apptainer exec -B /disks/node4_RAID6_120TB --env TMPDIR=/disks/node4_RAID6_120TB/hezhang/taikong/binning/semibin2/tmp /disks/node4_RAID6_120TB/hezhang/software/binning/semibin-2.2.0.sif  SemiBin2 single_easy_bin   -t 50 --self-supervised  --tmpdir /disks/node4_RAID6_120TB/hezhang/taikong/binning/semibin2/tmp   --input-fasta /disks/node4_RAID6_120TB/hezhang/taikong/binning/hun_2_contigs.fa.gz  --input-bam /disks/node4_RAID6_120TB/hezhang/taikong/binning/coverm/bam/${i}.bam  -o /disks/node4_RAID6_120TB/hezhang/taikong/binning/semibin2/${i}/bin" >> /disks/node4_RAID6_120TB/hezhang/taikong/binning/run_semibin/2/run.sh
+done
+
+for i in 25 26 27;
+do
+echo "apptainer exec -B /disks/node4_RAID6_120TB --env TMPDIR=/disks/node4_RAID6_120TB/hezhang/taikong/binning/semibin2/tmp /disks/node4_RAID6_120TB/hezhang/software/binning/semibin-2.2.0.sif  SemiBin2 single_easy_bin   -t 50 --self-supervised  --tmpdir /disks/node4_RAID6_120TB/hezhang/taikong/binning/semibin2/tmp   --input-fasta /disks/node4_RAID6_120TB/hezhang/taikong/binning/hun_2_contigs.fa.gz  --input-bam /disks/node4_RAID6_120TB/hezhang/taikong/binning/coverm/bam/${i}.bam  -o /disks/node4_RAID6_120TB/hezhang/taikong/binning/semibin2/${i}/bin" >> /disks/node4_RAID6_120TB/hezhang/taikong/binning/run_semibin/3/run.sh
+done
+
+for i in 34 33 28;
+do
+echo "apptainer exec -B /disks/node4_RAID6_120TB --env TMPDIR=/disks/node4_RAID6_120TB/hezhang/taikong/binning/semibin2/tmp /disks/node4_RAID6_120TB/hezhang/software/binning/semibin-2.2.0.sif  SemiBin2 single_easy_bin   -t 50 --self-supervised  --tmpdir /disks/node4_RAID6_120TB/hezhang/taikong/binning/semibin2/tmp   --input-fasta /disks/node4_RAID6_120TB/hezhang/taikong/binning/hun_2_contigs.fa.gz  --input-bam /disks/node4_RAID6_120TB/hezhang/taikong/binning/coverm/bam/${i}.bam  -o /disks/node4_RAID6_120TB/hezhang/taikong/binning/semibin2/${i}/bin" >> /disks/node4_RAID6_120TB/hezhang/taikong/binning/run_semibin/4/run.sh
+done
+
+for i in 34 33 23;
+do
+echo "apptainer exec -B /disks/node4_RAID6_120TB --env TMPDIR=/disks/node4_RAID6_120TB/hezhang/taikong/binning/semibin2/tmp /disks/node4_RAID6_120TB/hezhang/software/binning/semibin-2.2.0.sif  SemiBin2 single_easy_bin   -t 50 --self-supervised  --tmpdir /disks/node4_RAID6_120TB/hezhang/taikong/binning/semibin2/tmp   --input-fasta /disks/node4_RAID6_120TB/hezhang/taikong/binning/hun_2_contigs.fa.gz  --input-bam /disks/node4_RAID6_120TB/hezhang/taikong/binning/coverm/bam/${i}.bam  -o /disks/node4_RAID6_120TB/hezhang/taikong/binning/semibin2/${i}/bin" >> /disks/node4_RAID6_120TB/hezhang/taikong/binning/run_semibin/5/run.sh
+done
+
+for i in 1 2 3 4 5;
+do
+cd /disks/node4_RAID6_120TB/hezhang/taikong/binning/run_semibin/${i};
+nohup sh run.sh &
+done
+
+
+
+
+for i in 10 11 12 14 15 16 23 27 28 33 34;
+do
+mkdir -p /disks/node4_RAID6_120TB/hezhang/taikong/binning/run_semibin2/${i};
+done
+
+
+for i in 10 11 12 14 15 16 23 27 28 33 34;
+do
+echo "apptainer exec -B /disks/node4_RAID6_120TB --env TMPDIR=/disks/node4_RAID6_120TB/hezhang/taikong/binning/semibin2/tmp /disks/node4_RAID6_120TB/hezhang/software/binning/semibin-2.2.0.sif  SemiBin2 single_easy_bin   -t 200 --self-supervised  --tmpdir /disks/node4_RAID6_120TB/hezhang/taikong/binning/semibin2/tmp   --input-fasta /disks/node4_RAID6_120TB/hezhang/taikong/binning/hun_2_contigs.fa.gz  --input-bam /disks/node4_RAID6_120TB/hezhang/taikong/binning/coverm/bam/${i}.bam  -o /disks/node4_RAID6_120TB/hezhang/taikong/binning/semibin2/${i}/bin" >> /disks/node4_RAID6_120TB/hezhang/taikong/binning/run_semibin2/${i}/run.sh
+done
+
+for i in 10 11 12 14 15 16 23 27 28 33;
+do
+cd /disks/node4_RAID6_120TB/hezhang/taikong/binning/run_semibin2/${i};
+nohup sh run.sh &
+done
+
+
+for i in 10 11 12 14 15 16 23 27 28 34;
+do
+apptainer exec -B /disks/node4_RAID6_120TB --env TMPDIR=/disks/node4_RAID6_120TB/hezhang/taikong/binning/semibin2/tmp /disks/node4_RAID6_120TB/hezhang/software/binning/semibin-2.2.0.sif  SemiBin2 single_easy_bin   -t 200 --self-supervised  --tmpdir /disks/node4_RAID6_120TB/hezhang/taikong/binning/semibin2/tmp   --input-fasta /disks/node4_RAID6_120TB/hezhang/taikong/binning/hun_2_contigs.fa.gz  --input-bam /disks/node4_RAID6_120TB/hezhang/taikong/binning/coverm/bam/${i}.bam  -o /disks/node4_RAID6_120TB/hezhang/taikong/binning/semibin2/${i}/bin
+done
+
+
+
+apptainer exec -B /disks/node4_RAID6_120TB --env  TMPDIR=/disks/node4_RAID6_120TB/hezhang/taikong/binning/semibin2/tmp    /disks/node4_RAID6_120TB/hezhang/software/binning/semibin-2.2.0.sif SemiBin2 multi_easy_bin --separator "_" -i /disks/node4_RAID6_120TB/hezhang/taikong/binning/hun_2_contigs.fa.gz -b /disks/node4_RAID6_120TB/hezhang/taikong/binning/coverm/bam/*.bam -o /disks/node4_RAID6_120TB/hezhang/taikong/binning/semibin2/all 
+
+
+
+for i in 10 11 12 13 14 15 16 23 24 25 26 27 28 34 35 36 9 33;
+do
+mkdir -p /disks/node4_RAID6_120TB/hezhang/taikong/binning/run/${i};
+mkdir -p /disks/node4_RAID6_120TB/hezhang/taikong/binning/semibin2/${i}
+mkdir -p /disks/node4_RAID6_120TB/hezhang/taikong/binning/maxbin2/${i}
+mkdir -p /disks/node4_RAID6_120TB/hezhang/taikong/binning/metabat2/${i}/
+done
+
+### 要加-B不然容器识别不了所在路径,如果一条命令中有多个外置存储路径，例如node3_RAID6_120TB、node4_RAID6_120TB，此时要加两个-B;例如：-B 例如: node3_RAID6_120TB -B node4_RAID6_120TB
+cp /disks/node3_RAID6_120TB/hezhang/taikong/megahit/result/hun_2_contigs.fa.gz /disks/node4_RAID6_120TB/hezhang/taikong/binning
+
+for i in 10 11 12 13 14 15 16 23 24 25 26 27 28 34 35 36 9 33;
+do
+echo "apptainer exec -B /disks/node4_RAID6_120TB /disks/node4_RAID6_120TB/hezhang/software/binning/metabat-2.18.sif metabat --numThreads 12 -x 1   -i /disks/node4_RAID6_120TB/hezhang/taikong/binning/hun_2_contigs.fa.gz    -a /disks/node4_RAID6_120TB/hezhang/taikong/binning/coverm/metabat/${i}.txt  -o /disks/node4_RAID6_120TB/hezhang/taikong/binning/metabat2/${i}/bin;
+        
+apptainer exec -B /disks/node4_RAID6_120TB /disks/node4_RAID6_120TB/hezhang/software/binning/maxbin2-2.2.7.sif   run_MaxBin.pl  -contig /disks/node4_RAID6_120TB/hezhang/taikong/binning/hun_2_contigs.fa.gz -max_iteration 50 -thread 12 -abund /disks/node4_RAID6_120TB/hezhang/taikong/binning/coverm/metabat/${i}.txt  -out /disks/node4_RAID6_120TB/hezhang/taikong/binning/maxbin2/${i}/bin;
+
+apptainer exec -B /disks/node4_RAID6_120TB --env TMPDIR=/disks/node4_RAID6_120TB/hezhang/taikong/binning/semibin2/tmp /disks/node4_RAID6_120TB/hezhang/software/binning/semibin-2.2.0.sif  SemiBin2 single_easy_bin   -t 12 --self-supervised  --tmpdir /disks/node4_RAID6_120TB/hezhang/taikong/binning/semibin2/tmp   --input-fasta /disks/node4_RAID6_120TB/hezhang/taikong/binning/hun_2_contigs.fa.gz  --input-bam /disks/node4_RAID6_120TB/hezhang/taikong/binning/coverm/bam/${i}.bam  -o /disks/node4_RAID6_120TB/hezhang/taikong/binning/semibin2/${i}/bin" >  /disks/node4_RAID6_120TB/hezhang/taikong/binning/run/${i}/run.sh;
+done
+
+for i in 10 11 12 13 14 15 16 23 24 25 26 27 28 34 35 36 9 33;
+do
+cd  /disks/node4_RAID6_120TB/hezhang/taikong/binning/run/${i};
+nohup sh run.sh &
+done
+
+
+##### 重新分混拼semibin2
+apptainer exec -B /disks/node4_RAID6_120TB --env TMPDIR=/disks/node4_RAID6_120TB/hezhang/taikong/binning/semibin2/tmp /disks/node4_RAID6_120TB/hezhang/software/binning/semibin-2.2.0.sif SemiBin2 concatenate_fasta -i /disks/node4_RAID6_120TB/hezhang/taikong/binning/semibin2/contigs/result/*.fa -o /disks/node4_RAID6_120TB/hezhang/taikong/binning/semibin2/contigs/output
+
+for i in `cut -f1 /disks/node3_RAID6_120TB/hezhang/taikong/metagenomic/1.txt`;
+do
+mkdir -p /disks/node4_RAID6_120TB/hezhang/taikong/binning/semibin2/contigs/coverm/minimap2/${i}
+mkdir -p /disks/node4_RAID6_120TB/hezhang/taikong/binning/semibin2/contigs/run/${i}
+done
+
+#### 不能激活biostack
+conda activate coverm 
+
+for i in `cut -f1 /disks/node3_RAID6_120TB/hezhang/taikong/metagenomic/1.txt`;
+do
+echo "TMPDIR=/disks/node4_RAID6_120TB/hezhang/taikong/binning/semibin2/contigs/tmp coverm make -p minimap2-sr -t 12 -r /disks/node4_RAID6_120TB/hezhang/taikong/binning/semibin2/contigs/output/concatenated.fa.gz -1 /disks/node4_RAID6_120TB/hezhang/taikong/cleanreads/1/${i}_R1.fastq.gz -2 /disks/node4_RAID6_120TB/hezhang/taikong/cleanreads/2/${i}_R2.fastq.gz -o /disks/node4_RAID6_120TB/hezhang/taikong/binning/semibin2/contigs/coverm/minimap2/${i}; 
+mv /disks/node4_RAID6_120TB/hezhang/taikong/binning/semibin2/contigs/coverm/minimap2/${i}/*.bam /disks/node4_RAID6_120TB/hezhang/taikong/binning/semibin2/contigs/coverm/bam/${i}.bam;" > /disks/node4_RAID6_120TB/hezhang/taikong/binning/semibin2/contigs/run/${i}/run.sh
+done
+
+for i in `cut -f1 /disks/node3_RAID6_120TB/hezhang/taikong/metagenomic/1.txt`;
+do
+cd /disks/node4_RAID6_120TB/hezhang/taikong/binning/semibin2/contigs/run/${i}
+rm nohup.out
+nohup sh run.sh &
+done
+
+
+#### 宿主
+##### 安装defensefinder在MacSyFinder中
+conda create -n defensefinder python=3.10
+conda activate defensefinder
+pip install mdmparis-defense-finder -i https://pypi.tuna.tsinghua.edu.cn/simple
+
+
+mkdir -p /disks/node4_RAID6_120TB/hezhang/taikong/host/gongfang/defensefinder/result
+cd /disks/node4_RAID6_120TB/hezhang/taikong/host/gongfang/defensefinder
+cp /disks/node4_RAID6_120TB/hezhang/taikong/host/instrain/prodigal/all_mags.fa.genes.faa ./
+mv /disks/RAID6_120TB/hz/m_mnpk_npk_ck/MacSyFinder/genome_faa ./
+
+conda activate defensefinder
+
+
+for i in `cut -f1 /disks/node4_RAID6_120TB/hezhang/taikong/binning/mags_kegg/host2.txt`;
+do
+defense-finder run /disks/node4_RAID6_120TB/hezhang/taikong/binning/mags_prokka/result/${i}/${i}_prokka.faa -o /disks/node4_RAID6_120TB/hezhang/taikong/host/gongfang/defensefinder/result/${i};
+done
+
+for i in `cut -f1 /disks/node4_RAID6_120TB/hezhang/taikong/binning/mags_kegg/host2.txt`;
+do
+tail -n+2 /disks/node4_RAID6_120TB/hezhang/taikong/host/gongfang/defensefinder/result/${i}/${i}_prokka_defense_finder_genes.tsv >> /disks/node4_RAID6_120TB/hezhang/taikong/host/gongfang/defensefinder/result/mags_defensefinder.txt;
+done
+
+
+
+for i in `cut -f1 /disks/node3_RAID6_120TB/hezhang/taikong/binning/drep_all/drep98/gtdb/bac_de_novo_wf/infer/mags.txt`;
+do
+defense-finder run /disks/node4_RAID6_120TB/hezhang/taikong/binning/mags_prokka/result/${i}/${i}_prokka.faa -o /disks/node4_RAID6_120TB/hezhang/taikong/host/gongfang/defensefinder/all_mags/result/${i};
+done
+
+
+grep -v "sys_id" /disks/RAID6_120TB/hz/m_mnpk_npk_ck/defensefinder/229_mags_defense_finder_systems.tsv > /disks/RAID6_120TB/hz/m_mnpk_npk_ck/defensefinder/1.tsv
+
+
+tsv-utils cut -f4,2 /disks/RAID6_120TB/hz/m_mnpk_npk_ck/defensefinder/1.tsv | tsv-utils bins - > /disks/RAID6_120TB/hz/m_mnpk_npk_ck/defensefinder/MAGs_defensefinder.txt
+
+
+
+#### toxin
+#### Metafisher
+#### node3
+mkdir -p /disks/node4_RAID6_120TB/hezhang/taikong/Metafisher/votu
+cd /disks/node4_RAID6_120TB/hezhang/taikong/Metafisher/votu
+cp /disks/node3_RAID6_120TB/hezhang/taikong/viruse/vOTU/vOTU.fasta  /disks/node4_RAID6_120TB/hezhang/taikong/Metafisher/votu
+mkdir -p /disks/node4_RAID6_120TB/hezhang/taikong/Metafisher/votu/prodigal
+
+prodigal \
+ -i /disks/node4_RAID6_120TB/hezhang/taikong/Metafisher/votu/vOTU.fasta \
+ -o /disks/node4_RAID6_120TB/hezhang/taikong/Metafisher/votu/prodigal/vOTU_genes.gff \
+ -f gff \
+ -d /disks/node4_RAID6_120TB/hezhang/taikong/Metafisher/votu/prodigal/vOTU_genes.fna \
+ -a /disks/node4_RAID6_120TB/hezhang/taikong/Metafisher/votu/prodigal/vOTU_genes.faa \
+ -p meta
+ 
+### 替换gff文件第一列
+cd /disks/node4_RAID6_120TB/hezhang/taikong/Metafisher/votu/prodigal
+grep ">" /disks/node4_RAID6_120TB/hezhang/taikong/Metafisher/votu/prodigal/vOTU_genes.faa  |tsv-utils cut -f1 -s '#' -| sed 's/ //g' -| sed 's/#/\t/g' -| sed 's/>/ID=/g' -> faa.txt
+
+grep "ID" /disks/node4_RAID6_120TB/hezhang/taikong/Metafisher/votu/prodigal/vOTU_genes.gff > 1.txt
+
+awk 'FNR==NR {a[NR]=$1; next} {print $1, $2, $3, $4, $5, $6, $7, $8, a[FNR], $9}' faa.txt 1.txt > output.txt
+
+awk '
+BEGIN{FS="[[:space:]]+"; OFS="\t"}
+{
+  # 取第一段ID=vOTU_x_y作为new_id
+  if ($9 ~ /^ID=/) {
+    new_id = substr($9,4)
+    $1 = new_id
+  }
+
+  # 删除第二个ID=1_1;（它在$10开头）
+  if ($10 ~ /^ID=[^;]+;/) {
+    sub(/^ID=[^;]+;/, "", $10)
+  }
+
+  # 重建attributes：ID=vOTU_1_1; + 后面所有内容（无空格拼接）
+  attrs = $9
+  if (attrs !~ /;$/) attrs = attrs ";"
+  attrs = attrs $10
+  for (i=11; i<=NF; i++) attrs = attrs $i
+
+  # 输出标准9列GFF（前8列 + attrs）
+  print $1,$2,$3,$4,$5,$6,$7,$8,attrs
+}' output.txt > vOTU_genes_fixed.gff
+
+
+#### votu
+/disks/node3_RAID6_120TB/hezhang/software/Metafisher/MeTAfisher/metafisher/metafisher.py \
+  --gff /disks/node4_RAID6_120TB/hezhang/taikong/Metafisher/votu/prodigal/vOTU_genes_fixed.gff  \
+  --faa /disks/node4_RAID6_120TB/hezhang/taikong/Metafisher/votu/prodigal/vOTU_genes.faa \
+  --outdir /disks/node4_RAID6_120TB/hezhang/taikong/Metafisher/votu/metafisher_results \
+  --diamond_db /disks/node3_RAID6_120TB/hezhang/software/Metafisher/MeTAfisher/TA_data/type_II_TA.dmnd \
+  -v
+
+### host
+mkdir -p /disks/node4_RAID6_120TB/hezhang/taikong/Metafisher/host/prodigal
+cd /disks/node4_RAID6_120TB/hezhang/taikong/Metafisher/host
+cp /disks/node4_RAID6_120TB/hezhang/taikong/host/instrain/all_mags.fa  /disks/node4_RAID6_120TB/hezhang/taikong/Metafisher/host
+
+prodigal \
+ -i /disks/node4_RAID6_120TB/hezhang/taikong/Metafisher/host/all_mags.fa \
+ -o /disks/node4_RAID6_120TB/hezhang/taikong/Metafisher/host/prodigal/all_mags_genes.gff \
+ -f gff \
+ -d /disks/node4_RAID6_120TB/hezhang/taikong/Metafisher/host/prodigal/all_mags_genes.fna \
+ -a /disks/node4_RAID6_120TB/hezhang/taikong/Metafisher/host/prodigal/all_mags_genes.faa \
+ -p meta
+
+cd /disks/node4_RAID6_120TB/hezhang/taikong/Metafisher/host/prodigal
+grep ">" /disks/node4_RAID6_120TB/hezhang/taikong/Metafisher/host/prodigal/all_mags_genes.faa |tsv-utils cut -f1 -s '#' -| sed 's/ //g' -| sed 's/#/\t/g' -| sed 's/>/ID=/g' -> faa.txt
+
+grep "ID" /disks/node4_RAID6_120TB/hezhang/taikong/Metafisher/host/prodigal/all_mags_genes.gff > 1.txt
+
+awk 'FNR==NR {a[NR]=$1; next} {print $1, $2, $3, $4, $5, $6, $7, $8, a[FNR], $9}' faa.txt 1.txt > output.txt
+
+awk '
+BEGIN{FS="[[:space:]]+"; OFS="\t"}
+{
+  # 取第一段ID=vOTU_x_y作为new_id
+  if ($9 ~ /^ID=/) {
+    new_id = substr($9,4)
+    $1 = new_id
+  }
+
+  # 删除第二个ID=1_1;（它在$10开头）
+  if ($10 ~ /^ID=[^;]+;/) {
+    sub(/^ID=[^;]+;/, "", $10)
+  }
+
+  # 重建attributes：ID=vOTU_1_1; + 后面所有内容（无空格拼接）
+  attrs = $9
+  if (attrs !~ /;$/) attrs = attrs ";"
+  attrs = attrs $10
+  for (i=11; i<=NF; i++) attrs = attrs $i
+
+  # 输出标准9列GFF（前8列 + attrs）
+  print $1,$2,$3,$4,$5,$6,$7,$8,attrs
+}' output.txt > mags_genes_fixed.gff
+
+sed 's/ID=//g' faa.txt  | tsv-utils annotation mags_genes_fixed.gff - > mags_genes_fixed_2.gff
+
+
+cat > rm_ids.txt <<'EOF'
+gtdb_41_40_12
+gtdb_41_71_71
+gtdb_42_9_3
+gtdb_41_71_2
+gtdb_41_93_13
+gtdb_41_47_15
+gtdb_42_13_9
+EOF
+
+in=/disks/node4_RAID6_120TB/hezhang/taikong/Metafisher/host/prodigal/all_mags_genes.faa
+out=/disks/node4_RAID6_120TB/hezhang/taikong/Metafisher/host/prodigal/all_mags_genes.rm7.faa
+
+awk '
+BEGIN{
+  while((getline<"rm_ids.txt")>0){rm[$1]=1}
+}
+{
+  if($0 ~ /^>/){
+    id=$0; sub(/^>/,"",id); split(id,a,/[\t ]+/); keep=!(a[1] in rm)
+  }
+  if(keep) print
+}' "$in" > "$out"
+
+
+
+#### host
+/disks/node3_RAID6_120TB/hezhang/software/Metafisher/MeTAfisher/metafisher/metafisher.py \
+  --gff /disks/node4_RAID6_120TB/hezhang/taikong/Metafisher/host/prodigal/mags_genes_fixed_2.gff \
+  --faa /disks/node4_RAID6_120TB/hezhang/taikong/Metafisher/host/prodigal/all_mags_genes.rm7.faa \
+  --outdir /disks/node4_RAID6_120TB/hezhang/taikong/Metafisher/host/metafisher_results \
+  --diamond_db /disks/node3_RAID6_120TB/hezhang/software/Metafisher/MeTAfisher/TA_data/type_II_TA.dmnd \
+  -v
+
+
+#### Mgcod
+### node3,/home/hezhang中有.gm_key
+
+conda activate mgcod
+mkdir -p /disks/node4_RAID6_120TB/hezhang/taikong/votu/mgcod
+cd /disks/node4_RAID6_120TB/hezhang/taikong/votu/mgcod
+
+### 只找大于5000bp即可,Mgcod不考虑小于5000bp，17373条
+
+seqkit seq -m 5000 \
+/disks/node4_RAID6_120TB/hezhang/taikong/Metafisher/votu/vOTU.fasta \
+> /disks/node4_RAID6_120TB/hezhang/taikong/votu/mgcod/vOTU_ge5kb.fasta
+
+awk '!/^>/{printf "%s", $0; n="\n"}/^>/{print n $0; n=""}END{printf "%s", n}' /disks/node4_RAID6_120TB/hezhang/taikong/votu/mgcod/vOTU_ge5kb.fasta > /disks/node4_RAID6_120TB/hezhang/taikong/votu/mgcod/vOTU_ge5kb_1.fasta
+
+cd /disks/node4_RAID6_120TB/hezhang/taikong/votu/mgcod
+seqkit split -i vOTU_ge5kb.fasta -O split_vOTU
+cd split_vOTU
+rename vOTU_ge5kb.part_v v *
+
+ls -d "$PWD"/* > ../vcontig.txt 
+
+multiprocess_mgcod.py --genomes vcontig.txt --isoforms -p mgm_results --threads 180 -o results
+
+
+mkdir -p /disks/node4_RAID6_120TB/hezhang/taikong/votu/mgcod/tab
+cd /disks/node4_RAID6_120TB/hezhang/taikong/votu/mgcod/tab
+cp /disks/node4_RAID6_120TB/hezhang/taikong/votu/mgcod/results/*.tab /disks/node4_RAID6_120TB/hezhang/taikong/votu/mgcod/tab
+cd /disks/node4_RAID6_120TB/hezhang/taikong/votu/mgcod/tab
+rm *_stats.tab
+ls ./ | sed 's/.tab//g'> ../name.txt
+
+for i in `cut -f1 /disks/node4_RAID6_120TB/hezhang/taikong/votu/mgcod/name.txt`;
+do
+tail -n+2 /disks/node4_RAID6_120TB/hezhang/taikong/votu/mgcod/tab/${i}.tab | sed ':a;N;$!ba;s/\n/\t/g' - >> /disks/node4_RAID6_120TB/hezhang/taikong/votu/mgcod/all.tab.txt;
+done
+
+#### MacSyFinder
+
+mkdir -p /disks/node4_RAID6_120TB/hezhang/taikong/host/instrain/mags_rename/MacSyFinder/run/CasFinder
+mkdir -p /disks/node4_RAID6_120TB/hezhang/taikong/host/instrain/mags_rename/MacSyFinder/run/CONJScan
+mkdir -p /disks/node4_RAID6_120TB/hezhang/taikong/host/instrain/mags_rename/MacSyFinder/run/TFFscan
+mkdir -p /disks/node4_RAID6_120TB/hezhang/taikong/host/instrain/mags_rename/MacSyFinder/run/TXSScan
+
+mkdir -p /disks/node4_RAID6_120TB/hezhang/taikong/host/instrain/mags_rename/MacSyFinder/result/CasFinder
+mkdir -p /disks/node4_RAID6_120TB/hezhang/taikong/host/instrain/mags_rename/MacSyFinder/result/CONJScan
+mkdir -p /disks/node4_RAID6_120TB/hezhang/taikong/host/instrain/mags_rename/MacSyFinder/result/TFFscan
+mkdir -p /disks/node4_RAID6_120TB/hezhang/taikong/host/instrain/mags_rename/MacSyFinder/result/TXSScan
+
+for i in `cut -f1 /disks/node4_RAID6_120TB/hezhang/taikong/binning/mags_kegg/host2.txt`;
+do
+macsyfinder \
+  --db-type unordered \
+  --sequence-db /disks/node4_RAID6_120TB/hezhang/taikong/host/instrain/mags_rename/${i}.fa \
+  -o /disks/node4_RAID6_120TB/hezhang/taikong/host/instrain/mags_rename/MacSyFinder/result/CasFinder/${i} \
+  --models-dir /home/hezhang/.macsyfinder/models \
+  --models CasFinder all
+done
+
+for i in `cut -f1 /disks/node4_RAID6_120TB/hezhang/taikong/binning/mags_kegg/host2.txt`;
+do
+macsyfinder \
+  --db-type unordered \
+  --sequence-db /disks/node4_RAID6_120TB/hezhang/taikong/host/instrain/mags_rename/${i}.fa \
+  -o /disks/node4_RAID6_120TB/hezhang/taikong/host/instrain/mags_rename/MacSyFinder/result/CONJScan/${i} \
+  --models-dir /home/hezhang/.macsyfinder/models \
+  --models CONJScan all
+done
+
+for i in `cut -f1 /disks/node4_RAID6_120TB/hezhang/taikong/binning/mags_kegg/host2.txt`;
+do
+macsyfinder \
+  --db-type unordered \
+  --sequence-db /disks/node4_RAID6_120TB/hezhang/taikong/host/instrain/mags_rename/${i}.fa \
+  -o /disks/node4_RAID6_120TB/hezhang/taikong/host/instrain/mags_rename/MacSyFinder/result/TFFscan/${i} \
+  --models-dir /home/hezhang/.macsyfinder/models \
+  --models TFFscan all
+done
+
+for i in `cut -f1 /disks/node4_RAID6_120TB/hezhang/taikong/binning/mags_kegg/host2.txt`;
+do
+macsyfinder \
+  --db-type unordered \
+  --sequence-db /disks/node4_RAID6_120TB/hezhang/taikong/host/instrain/mags_rename/${i}.fa \
+  -o /disks/node4_RAID6_120TB/hezhang/taikong/host/instrain/mags_rename/MacSyFinder/result/TXSScan/${i} \
+  --models-dir /home/hezhang/.macsyfinder/models \
+  --models TXSScan all
+done
+
+for i in CasFinder  CONJScan  TFFscan  TXSScan;
+do
+cd /disks/node4_RAID6_120TB/hezhang/taikong/host/instrain/mags_rename/MacSyFinder/run/${i}
+nohup sh run.sh &
+done
+
+#### 以上CasFinder  CONJScan  TFFscan  TXSScan的代码作废，使用defensefinder重新跑
+
+mkdir -p /disks/node4_RAID6_120TB/hezhang/taikong/host/gongfang/defensefinder/result_c_c_t_t
+MODELS=/home/hezhang/.macsyfinder/models
+
+while read -r i; do
+  defense-finder run \
+    /disks/node4_RAID6_120TB/hezhang/taikong/binning/mags_prokka/result/${i}/${i}_prokka.faa \
+    -o /disks/node4_RAID6_120TB/hezhang/taikong/host/gongfang/defensefinder/result_c_c_t_t/${i} \
+    --models-dir "$MODELS"
+done < /disks/node4_RAID6_120TB/hezhang/taikong/binning/mags_kegg/host2.txt
+
+
+MODELS=/home/hezhang/.macsyfinder/models
+i=13_hun_SB_1257
+
+defense-finder run \
+  /disks/node4_RAID6_120TB/hezhang/taikong/binning/mags_prokka/result/${i}/${i}_prokka.faa \
+  -o /disks/node4_RAID6_120TB/hezhang/taikong/host/gongfang/defensefinder/result_c_c_t_t/${i}_test \
+  --models-dir "$MODELS"
